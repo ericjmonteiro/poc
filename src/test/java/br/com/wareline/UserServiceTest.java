@@ -22,7 +22,7 @@ public class UserServiceTest {
 
     UserRepositoryImpl mock = Mockito.mock(UserRepositoryImpl.class);
     Mockito.when(mock.findByName("Eric"))
-        .thenReturn(Optional.of(UserEntity.builder().name("Eric").age(30).build()));
+        .thenReturn(Optional.of(UserEntity.builder().ueername("Eric").age(30).build()));
     QuarkusMock.installMockForType(mock, UserRepositoryImpl.class);
   }
 

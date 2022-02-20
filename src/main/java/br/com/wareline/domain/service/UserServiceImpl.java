@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public UserEntity save(UserEntity userEntity) {
     repository.persistAndFlush(userEntity);
-    return UserEntity.builder().name(userEntity.getName()).build();
+    return userEntity;
   }
 
   @Override
