@@ -1,6 +1,7 @@
 package br.com.wareline.application.controller;
 
-import br.com.wareline.application.exception.CustomException;
+import br.com.wareline.application.exception.PocExceptionHandler;
+import br.com.wareline.application.exception.user.UserNotFoundException;
 import br.com.wareline.domain.service.UserService;
 import br.com.wareline.domain.vo.UserVO;
 import br.com.wareline.infrastructure.database.entity.UserEntity;
@@ -11,8 +12,10 @@ import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -62,7 +65,7 @@ public class UserController {
                   @Content(
                       mediaType = "application/json",
                       schema = @Schema(implementation = UserEntity.class))))
-  public UserEntity save(@Valid UserVO vo) throws CustomException {
+  public UserEntity save(@Valid UserVO vo) throws UserNotFoundException {
 
     final UserEntity entity =
         UserEntity.builder()
@@ -74,11 +77,63 @@ public class UserController {
     return service.save(entity);
   }
 
+  @PUT
+  @RolesAllowed("ADMIN")
+  @Path("/{id}")
+  @Operation(summary = "Update user", description = "Update an existing user by id")
+  @APIResponses(
+      value = {
+        @APIResponse(
+            responseCode = "200",
+            description = "Success",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = UserEntity.class))),
+        @APIResponse(
+            responseCode = "404",
+            description = "User not found",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = PocExceptionHandler.ErrorResponseBody.class)))
+      })
+  public UserEntity update(@PathParam("id") Long id, @Valid UserVO vo) {
+    final UserEntity entity =
+        UserEntity.builder()
+            .ueername(vo.getUsername())
+            .role(vo.getRole())
+            .password(BcryptUtil.bcryptHash(vo.getPassword()))
+            .age(vo.getAge())
+            .build();
+    return service.update(id, entity);
+  }
+
+  @DELETE
+  @RolesAllowed("ADMIN")
+  @Path("/{id}")
+  @Operation(summary = "Delete user", description = "Deletes a user by id")
+  @APIResponses(
+      value = {
+        @APIResponse(responseCode = "200", description = "Success"),
+        @APIResponse(
+            responseCode = "404",
+            description = "User not found",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = PocExceptionHandler.ErrorResponseBody.class)))
+      })
+  public Response deleteUser(@PathParam("id") long id) throws UserNotFoundException {
+    service.delete(id);
+    return Response.ok().build();
+  }
+
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/{name}")
   @RolesAllowed({"USER", "ADMIN"})
-  public Response getByName(@PathParam("name") String name) {
+  public Response getByName(@PathParam("name") String name) throws UserNotFoundException {
 
     return Response.ok(service.findByName(name)).build();
   }

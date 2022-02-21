@@ -21,13 +21,13 @@ public class UserServiceTest {
   void setUp() {
 
     UserRepositoryImpl mock = Mockito.mock(UserRepositoryImpl.class);
-    Mockito.when(mock.findByName("Eric"))
-        .thenReturn(Optional.of(UserEntity.builder().ueername("Eric").age(30).build()));
+    Mockito.when(mock.findByName("Joao"))
+        .thenReturn(Optional.of(UserEntity.builder().ueername("Joao").age(30).build()));
     QuarkusMock.installMockForType(mock, UserRepositoryImpl.class);
   }
 
   @Test
   void whenFindByUser_thenUserBeFound() {
-    Assertions.assertEquals(true, service.findByName("Eric").isPresent());
+    Assertions.assertEquals("Joao", service.findByName("Joao").getUeername());
   }
 }
